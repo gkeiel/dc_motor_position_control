@@ -24,4 +24,4 @@ legend('r(t)','y(t)','u(t)','e(t)');
 % save data
 set(gcf,'PaperUnits','centimeters');
 set(gcf,'PaperPosition',[0 0 25 15]);
-print(gcf, 'dc_motor_data_pid.png', '-dpng', '-r300');
+print(gcf, 'dc_motor_data_repetitive.png', '-dpng', '-r300');
