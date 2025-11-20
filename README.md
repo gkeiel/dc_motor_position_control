@@ -10,9 +10,15 @@ The following programs are available:
 - [PR controller]
 - [Repetitive controller]
 
-##
+## Pyshical experiment
 
-The 
+The physical experiment is presented bellow
+<p align="center">
+<img width="500" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/d628d326-d182-4be2-b000-68d90202edd6" />
+<img width="500" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/e1b99fd0-33b4-4536-8ad6-5086f1dbdcb5" />
+</p>
+
+## Results
 
 Let $r(t)$ be the reference of angular position, $y(t)$ the angular position, $u(t)$ the control signal, and $e(t)$ the tracking error. For a PID controller the following response is obtained:
 <p align="center">
