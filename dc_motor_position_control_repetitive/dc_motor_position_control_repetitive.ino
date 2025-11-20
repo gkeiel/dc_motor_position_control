@@ -1,8 +1,9 @@
 #include <TimerOne.h>
 
-float r, y, e, u, u_c, t, t_s;
-float dead = 5;
-int flag_i, i = 0, r_high = 90, r_low = -90;
+float r, y, e, e_1, e_2, u, u_p, u_r, u_c, u_1, u_2, t, t_s;
+float k_p, k_r, c_1, c_2, c_3, c_4, c_5;
+int flag_i, i = 0;
+float sine_a = 45, omega = 2.0*PI*0.1;
 
 
 void Timer1_ISR(void){
@@ -10,11 +11,30 @@ void Timer1_ISR(void){
 }
 
 void setup() {
-  // values
-  r   = 0;
+  float b_0, b_1, b_2, a_0, a_1, a_2;
+
+  // time values
   t   = 0;
   t_s = 0.002;
 
+  // controller gains
+  k_p = 456.96/2;
+  k_r = 72.73/2;
+
+  // controller coefficients
+  b_0 = 4*k_p +k_r*t_s;
+  b_1 = -8*k_p;
+  b_2 = 4*k_p -k_r*t_s;
+  a_0 = omega*omega*t_s*t_s +4;
+  a_1 = 2*omega*omega*t_s*t_s -8;
+
+  // controller coefficients normalized
+  c_1 = b_0/a_0;
+  c_2 = b_1/a_0;
+  c_3 = b_2/a_0;
+  c_4 = a_1/a_0;
+  c_5 = a_2/a_0;
+  
   // declares pins as output
   pinMode(3, OUTPUT);
   pinMode(5, OUTPUT);
@@ -27,37 +47,35 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float fact = 540.0/(1023.0/6.5);
-  y = (analogRead(A0) -511)*fact;
+  float y_m = analogRead(A0)*(5.0/1023);
+  y_m = y_m*720 -1800;
+  y = y_m;
 }
 
 void reference(){
   t += t_s;
-
-  float T = 20.0;
-  float D = 0.5;
-  float t_on = fmod(t, T);
-  
-  if (t_on <D*T) r = r_high;
-  else           r = r_low;
+  float phi = omega*t;
+  r         = sine_a*sin(phi);
 }
 
 void control(){
-  // reference
+  const int dead = 0;
+  const int umax = 100;
   reference();
 
   // error
-  e = r -y;
+  e   = r -y;
+  if (abs(e)<dead) e = 0.0;
 
-  // relay method
-  const int umax = 1000;
-  if (e > dead)  u = umax;
-  else if (e < -dead) u = -umax;
+  // control signal
+  u_p = k_p*e;
+  u_r = c_1*e +c_2*e_1 +c_3*e_2 -c_4*u_1 -c_5*u_2;
+  u   = u_p +u_r;
 
   // limit control signal
-  if (u >  umax) u = umax;
   if (u < -umax) u = -umax;
-  
+  if (u >  umax) u = umax;
+
   // PWM from 0 to 255
   u_c = abs(u)*(255.0/umax);
   if (u >= 0){
@@ -68,20 +86,19 @@ void control(){
     analogWrite(5, 0);   // 0
     analogWrite(3, u_c); // PWM
   }
+
+  // update past values
+  e_2 = e_1;
+  e_1 = e;
+  u_2 = u_1;
+  u_1 = u;
 }
 
 void communication(){
-
   while (Serial.available() > 0){
-    // read serial input
-    char c = Serial.read();
-    if (c == '+'){
-      dead +=.5;
-    }
-    if (c == '-'){
-      dead -=.5;
-      if (dead < 0) dead = 0;
-    }
+    // set reference
+    if (r < -360) r = -360;
+    if (r > 360)  r = 360;
   }
 
   // print signals
@@ -90,7 +107,7 @@ void communication(){
     Serial.print(" ");
     Serial.print(y, 2);
     Serial.print(" ");
-    Serial.print(dead, 2);
+    Serial.print(e, 2);
     Serial.print(" ");
     Serial.println(u, 2);
     i = 0;

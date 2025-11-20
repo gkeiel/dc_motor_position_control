@@ -12,12 +12,12 @@ void Timer1_ISR(void){
 void setup() {
   // PID gains
   k_p = 109.135;
-  k_i = 1091.3/3;
-  k_d = 2.728;
+  k_i = 3637/8;
+  k_d = 0.818;
 
   // PI gains
   //k_p = 81.85;
-  //k_i = 13.65;
+  //k_i = 1637;
   //k_d = 0;
   
   // values
@@ -40,9 +40,8 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float y_m = analogRead(A0)*(5.0/1023);
-  y_m = y_m*720 -1800;
-  y = y_m;
+  float fact = 540.0/(1023.0/6.5);
+  y = (analogRead(A0) -511)*fact;
 }
 
 void reference(){

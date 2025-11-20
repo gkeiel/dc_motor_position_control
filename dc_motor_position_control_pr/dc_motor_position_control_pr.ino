@@ -18,8 +18,8 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 456.96/2;
-  k_r = 72.73/2;
+  k_p = 72.75/100;
+  k_r = 1523/100;
 
   // controller coefficients
   b_0 = 4*k_p +k_r*t_s;
@@ -48,9 +48,8 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float y_m = analogRead(A0)*(5.0/1023);
-  y_m = y_m*720 -1800;
-  y = y_m;
+  float fact = 540.0/(1023.0/6.5);
+  y = (analogRead(A0) -511)*fact;
 }
 
 void reference(){
@@ -61,7 +60,7 @@ void reference(){
 
 void control(){
   const int dead = 0;
-  const int umax = 100;
+  const int umax = 1000;
   reference();
 
   // error
