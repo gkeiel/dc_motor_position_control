@@ -10,7 +10,7 @@ The following programs are available:
 - [PR controller]
 - [Repetitive controller]
 
-## Pyshical experiment
+## Physical experiment
 
 The physical experiment is presented bellow
 <p align="center">
