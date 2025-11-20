@@ -2,7 +2,7 @@
 
 float r, y, e, e_a, u, u_p, u_c, u_i, u_ia, u_d, u_da, k_p, k_i, k_d, p, t, t_s;
 int flag_i, i = 0;
-float sine_a = 45, sine_f = 0.1;
+float sine_a = 90, sine_f = 0.1;
 
 
 void Timer1_ISR(void){
@@ -10,15 +10,15 @@ void Timer1_ISR(void){
 }
 
 void setup() {
-  // PID gains
-  k_p = 109.135;
-  k_i = 3637/8;
-  k_d = 0.818;
+  // PID gains ZN classic
+  k_p = 138.9/2;
+  k_i = k_p/0.02/8;
+  k_d = k_p*0.005/2;
 
-  // PI gains
-  //k_p = 81.85;
-  //k_i = 1637;
-  //k_d = 0;
+  // PID gains ZN no overshoot
+  //k_p = 46.3;
+  //k_i = k_p/0.02/6;
+  //k_d = k_p*0.0132;
   
   // values
   p    = 1;
@@ -40,7 +40,7 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float fact = 540.0/(1023.0/6.5);
+  float fact = 450.0/128;
   y = (analogRead(A0) -511)*fact;
 }
 

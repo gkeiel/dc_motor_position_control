@@ -1,7 +1,7 @@
 #include <TimerOne.h>
 
 float r, y, e, u, u_c, t, t_s;
-float dead = 5;
+float dead = 4;
 int flag_i, i = 0, r_high = 90, r_low = -90;
 
 
@@ -27,7 +27,7 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float fact = 540.0/(1023.0/6.5);
+  float fact = 450.0/128;
   y = (analogRead(A0) -511)*fact;
 }
 

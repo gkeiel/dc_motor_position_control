@@ -47,9 +47,8 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float y_m = analogRead(A0)*(5.0/1023);
-  y_m = y_m*720 -1800;
-  y = y_m;
+  float fact = 540.0/(1023.0/6.5);
+  y = (analogRead(A0) -511)*fact;
 }
 
 void reference(){
@@ -60,7 +59,7 @@ void reference(){
 
 void control(){
   const int dead = 0;
-  const int umax = 100;
+  const int umax = 1000;
   reference();
 
   // error

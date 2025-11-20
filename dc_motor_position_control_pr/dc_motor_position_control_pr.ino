@@ -3,7 +3,7 @@
 float r, y, e, e_1, e_2, u, u_p, u_r, u_c, u_1, u_2, t, t_s;
 float k_p, k_r, c_1, c_2, c_3, c_4, c_5;
 int flag_i, i = 0;
-float sine_a = 45, omega = 2.0*PI*0.1;
+float sine_a = 90, omega = 2.0*PI*0.1;
 
 
 void Timer1_ISR(void){
@@ -18,8 +18,8 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 72.75/100;
-  k_r = 1523/100;
+  k_p = 92.6;
+  k_r = 2909/500;
 
   // controller coefficients
   b_0 = 4*k_p +k_r*t_s;
@@ -48,7 +48,7 @@ void setup() {
 
 void measurement(){
   // read sensor
-  float fact = 540.0/(1023.0/6.5);
+  float fact = 450.0/128;
   y = (analogRead(A0) -511)*fact;
 }
 
