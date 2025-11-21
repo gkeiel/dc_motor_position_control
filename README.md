@@ -20,7 +20,7 @@ The physical experiment is presented bellow
 
 ## Experimental results
 
-Let $r(t)$ be the reference of angular position, $y(t)$ the angular position, $u(t)$ the control signal, and $e(t)$ the tracking error. For a PID controller the following response is obtained:
+Let $r(t)$ be the reference of angular position, $y(t)$ the angular position, $u(t)$ the control signal, and $e(t)$ the tracking error. Assuming a problem of sinusoidal reference tracking with an 90 degrees amplitude, for a PID controller the following response is obtained:
 <p align="center">
 <img width="733" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/aa734a0e-5273-4374-818e-98b97d847cf7" />
 </p>
