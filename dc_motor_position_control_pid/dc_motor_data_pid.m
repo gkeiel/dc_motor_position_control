@@ -19,7 +19,9 @@ plot(t,u)
 plot(t,e)
 grid on;
 ylim([-100 100])
-legend('r(t)','y(t)','u(t)','e(t)');
+xlabel('Time (s)')
+ylabel('Signals')
+legend('r(t) [º]','y(t) [º]','u(t) [%]','e(t) [º]');
 
 % save data
 set(gcf,'PaperUnits','centimeters');

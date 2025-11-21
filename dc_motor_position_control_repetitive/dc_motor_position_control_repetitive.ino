@@ -1,9 +1,17 @@
 #include <TimerOne.h>
+# define MAX_BUF 200
 
-float r, y, e, e_1, e_2, u, u_p, u_r, u_c, u_1, u_2, t, t_s;
-float k_p, k_r, c_1, c_2, c_3, c_4, c_5;
-int flag_i, i = 0;
-float sine_a = 45, omega = 2.0*PI*0.1;
+// signals variables
+float r, y, e, x_r1, y_r1, u, u_r, u_c, t, t_s;
+// parameters variables
+float k_p, k_r, b, a;
+// flags and counters variables
+int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff;
+
+// constants
+const int w = 100, n = 5;
+const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
+float e_buffer[MAX_BUF];
 
 
 void Timer1_ISR(void){
@@ -11,30 +19,25 @@ void Timer1_ISR(void){
 }
 
 void setup() {
-  float b_0, b_1, b_2, a_0, a_1, a_2;
-
   // time values
   t   = 0;
   t_s = 0.002;
 
   // controller gains
-  k_p = 456.96/2;
-  k_r = 72.73/2;
+  k_p = 100;
+  k_r = 30;
 
-  // controller coefficients
-  b_0 = 4*k_p +k_r*t_s;
-  b_1 = -8*k_p;
-  b_2 = 4*k_p -k_r*t_s;
-  a_0 = omega*omega*t_s*t_s +4;
-  a_1 = 2*omega*omega*t_s*t_s -8;
+  // controller filter coefficients
+  b     = w*t_s/(2.0 +w*t_s);
+  a     = (2.0 -w*t_s)/(2.0 +w*t_s);
+  N_eff = round((10 +tau)/(t_s*n));
+  if (N_eff > MAX_BUF) N_eff = MAX_BUF;
 
-  // controller coefficients normalized
-  c_1 = b_0/a_0;
-  c_2 = b_1/a_0;
-  c_3 = b_2/a_0;
-  c_4 = a_1/a_0;
-  c_5 = a_2/a_0;
-  
+  // initialize values
+  x_r1 = 0.0;
+  y_r1 = 0.0;
+  for (int k = 0; k < N_eff; k++) e_buffer[k] = 0.0;
+
   // declares pins as output
   pinMode(3, OUTPUT);
   pinMode(5, OUTPUT);
@@ -45,14 +48,29 @@ void setup() {
   Timer1.attachInterrupt(Timer1_ISR);
 }
 
+float LPF(float x_r){
+  float y_r = b*x_r +b*x_r1 +a*y_r1;
+
+  x_r1 = x_r;
+  y_r1 = y_r;
+
+  return y_r;
+}
+
 void measurement(){
   // read sensor
-  float fact = 540.0/(1023.0/6.5);
+  float fact = 450.0/128;
   y = (analogRead(A0) -511)*fact;
 }
 
 void reference(){
   t += t_s;
+
+  if (t < t_ini){
+    r = 0.0;
+    return;
+  }
+
   float phi = omega*t;
   r         = sine_a*sin(phi);
 }
@@ -63,14 +81,27 @@ void control(){
   reference();
 
   // error
-  e   = r -y;
+  e = r -y;
   if (abs(e)<dead) e = 0.0;
 
   // control signal
-  u_p = k_p*e;
-  u_r = c_1*e +c_2*e_1 +c_3*e_2 -c_4*u_1 -c_5*u_2;
-  u   = u_p +u_r;
+  if (++n_counter >= n){
+    n_counter = 0;
 
+    // repetitive output
+    float y_r = LPF(e_buffer[idx]);
+    u_r = k_r*(e +y_r);
+    
+    // update past values and index
+    e_buffer[idx] = e;
+    idx++;
+    if (idx >= N_eff) idx = 0;
+  }
+  else{
+    u_r = 0;
+  }
+  u = k_p*e +u_r;
+  
   // limit control signal
   if (u < -umax) u = -umax;
   if (u >  umax) u = umax;
@@ -85,15 +116,13 @@ void control(){
     analogWrite(5, 0);   // 0
     analogWrite(3, u_c); // PWM
   }
-
-  // update past values
-  e_2 = e_1;
-  e_1 = e;
-  u_2 = u_1;
-  u_1 = u;
 }
 
 void communication(){
+  if (t < t_ini){
+    return;
+  }
+
   while (Serial.available() > 0){
     // set reference
     if (r < -360) r = -360;
@@ -101,7 +130,7 @@ void communication(){
   }
 
   // print signals
-  if ( i == 10 ){
+  if ( i == 1 ){
     Serial.print(r, 2);
     Serial.print(" ");
     Serial.print(y, 2);

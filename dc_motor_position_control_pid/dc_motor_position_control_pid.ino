@@ -1,8 +1,8 @@
 #include <TimerOne.h>
 
 float r, y, e, e_a, u, u_p, u_c, u_i, u_ia, u_d, u_da, k_p, k_i, k_d, p, t, t_s;
-int flag_i, i = 0;
-float sine_a = 90, sine_f = 0.1;
+int flag_i, i = 0, t_ini = 10;
+const float sine_a = 90, sine_f = 0.1;
 
 
 void Timer1_ISR(void){
@@ -46,6 +46,12 @@ void measurement(){
 
 void reference(){
   t += t_s;
+
+  if (t < t_ini){
+    r = 0.0;
+    return;
+  }
+
   float phi = 2.0*PI*sine_f*t;
   r         = sine_a*sin(phi);
 }
@@ -87,7 +93,10 @@ void control(){
 }
 
 void communication(){
-
+  if (t < t_ini){
+    return;
+  }
+  
   while (Serial.available() > 0){
     // set reference
     if (r < -360) r = -360;
@@ -95,7 +104,7 @@ void communication(){
   }
 
   // print signals
-  if ( i == 10 ){
+  if ( i == 1 ){
     Serial.print(r, 2);
     Serial.print(" ");
     Serial.print(y, 2);

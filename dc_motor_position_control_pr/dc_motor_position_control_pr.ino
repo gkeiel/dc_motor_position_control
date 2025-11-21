@@ -2,8 +2,8 @@
 
 float r, y, e, e_1, e_2, u, u_p, u_r, u_c, u_1, u_2, t, t_s;
 float k_p, k_r, c_1, c_2, c_3, c_4, c_5;
-int flag_i, i = 0;
-float sine_a = 90, omega = 2.0*PI*0.1;
+int flag_i, i = 0, t_ini = 10;
+const float sine_a = 90, omega = 2.0*PI*0.1;
 
 
 void Timer1_ISR(void){
@@ -54,6 +54,12 @@ void measurement(){
 
 void reference(){
   t += t_s;
+
+  if (t < t_ini){
+    r = 0.0;
+    return;
+  }
+
   float phi = omega*t;
   r         = sine_a*sin(phi);
 }
@@ -95,6 +101,10 @@ void control(){
 }
 
 void communication(){
+  if (t < t_ini){
+    return;
+  }
+
   while (Serial.available() > 0){
     // set reference
     if (r < -360) r = -360;
@@ -102,7 +112,7 @@ void communication(){
   }
 
   // print signals
-  if ( i == 10 ){
+  if ( i == 1 ){
     Serial.print(r, 2);
     Serial.print(" ");
     Serial.print(y, 2);
