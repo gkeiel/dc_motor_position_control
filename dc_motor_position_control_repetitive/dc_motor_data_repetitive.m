@@ -19,6 +19,7 @@ plot(t,u)
 plot(t,e)
 grid on;
 ylim([-100 100])
+title('Results for repetitive controller')
 xlabel('Time (s)')
 ylabel('Signals')
 legend('r(t) [º]','y(t) [º]','u(t) [%]','e(t) [º]');

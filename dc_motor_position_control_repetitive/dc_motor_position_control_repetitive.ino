@@ -71,7 +71,7 @@ void reference(){
     return;
   }
 
-  float phi = omega*t;
+  float phi = omega*(t -t_ini);
   r         = sine_a*sin(phi);
 }
 

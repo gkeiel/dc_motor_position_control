@@ -1,8 +1,8 @@
 #include <TimerOne.h>
 
 float r, y, e, e_a, u, u_p, u_c, u_i, u_ia, u_d, u_da, k_p, k_i, k_d, p, t, t_s;
-int flag_i, i = 0, t_ini = 10;
-const float sine_a = 90, sine_f = 0.1;
+int flag_i, i = 0, t_ini = 5;
+const float sine_a = 90, omega = 2.0*PI*0.1;
 
 
 void Timer1_ISR(void){
@@ -52,7 +52,7 @@ void reference(){
     return;
   }
 
-  float phi = 2.0*PI*sine_f*t;
+  float phi = omega*(t -t_ini);
   r         = sine_a*sin(phi);
 }
 
