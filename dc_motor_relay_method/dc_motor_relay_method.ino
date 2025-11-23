@@ -34,10 +34,14 @@ void measurement(){
 void reference(){
   t += t_s;
 
+  if (t < t_ini){
+    r = 0.0;
+    return;
+  }
+
   float T = 20.0;
   float D = 0.5;
   float t_on = fmod(t, T);
-  
   if (t_on <D*T) r = r_high;
   else           r = r_low;
 }
@@ -85,7 +89,7 @@ void communication(){
   }
 
   // print signals
-  if ( i == 10 ){
+  if ( i == 1 ){
     Serial.print(r, 2);
     Serial.print(" ");
     Serial.print(y, 2);

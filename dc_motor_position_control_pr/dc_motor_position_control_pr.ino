@@ -19,10 +19,10 @@ void setup() {
 
   // controller gains
   k_p = 92.59;
-  k_r = 29090;
+  k_r = 29090/10;
 
   // controller coefficients
-  xi    = 0.005;
+  xi    = 0.0001;
   alpha = omega/tan(omega*t_s/2.0);
   b_0 = 4.0*k_p*alpha*alpha +4.0*k_p*alpha*omega*xi +k_r*alpha*omega*xi +k_r*omega*omega;
   b_1 = -8.0*k_p*alpha*alpha +2.0*k_r*omega*omega; 

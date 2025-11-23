@@ -9,7 +9,7 @@ float k_p, k_r, b, a;
 int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff;
 
 // constants
-const int w = 100, n = 5;
+const int w = 1000, n = 5;
 const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
 float e_buffer[MAX_BUF];
 
@@ -24,8 +24,8 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 100;
-  k_r = 30;
+  k_p = 130;
+  k_r = 40;
 
   // controller filter coefficients
   b     = w*t_s/(2.0 +w*t_s);
