@@ -37,5 +37,5 @@ For a PR controller the following response is obtained:
 
 For a repetitive controller the following response is obtained:
 <p align="center">
-<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/aafb6063-1026-49f4-89be-3093f93d16ed" />
+<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/7d06a61d-ee27-4981-be56-7f738cf4a47e" />
 </p>
