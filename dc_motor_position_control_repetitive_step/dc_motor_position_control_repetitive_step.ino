@@ -6,11 +6,11 @@ float r, y, e, x_r1, y_r1, u, u_r, u_c, t, t_s;
 // parameters variables
 float k_p, k_r, b, a;
 // flags and counters variables
-int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff;
+int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff, r_high = 90, r_low = 0;
 
 // constants
 const int w = 1000, n = 20;
-const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
+const float omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
 float e_buffer[MAX_BUF];
 
 
@@ -24,13 +24,13 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 20;
-  k_r = 70;
+  k_p = 18;
+  k_r = 15;
 
   // controller filter coefficients
   b     = w*t_s/(2.0 +w*t_s);
   a     = (2.0 -w*t_s)/(2.0 +w*t_s);
-  N_eff = round((tau)/(t_s*n));
+  N_eff = floor((tau)/(t_s*n));
   if (N_eff > MAX_BUF) N_eff = MAX_BUF;
 
   // initialize values
@@ -71,8 +71,11 @@ void reference(){
     return;
   }
 
-  float phi = omega*(t -t_ini);
-  r         = sine_a*sin(phi);
+  float T = 10.0;
+  float D = 0.5;
+  float t_on = fmod(t -t_ini, T);
+  if (t_on <D*T) r = r_high;
+  else           r = r_low;
 }
 
 void control(){

@@ -7,7 +7,7 @@ N  = size(data,1);
 t  = (0:N-1)/fs;
 r  = data.Channel1;
 y  = data.Channel2;
-e  = data.Channel3;
+d  = data.Channel3;
 u  = data.Channel4;
 
 % plot data
@@ -16,12 +16,11 @@ plot(t,r)
 hold on
 plot(t,y)
 plot(t,u)
-plot(t,e)
 grid on;
 ylim([-100 100])
 xlabel('Time (s)')
 ylabel('Signals')
-legend('r(t) [º]','y(t) [º]','u(t) [%]','e(t) [º]');
+legend('r(t) [º]','y(t) [º]','u(t) [%]');
 
 % save data
 set(gcf,'PaperUnits','centimeters');

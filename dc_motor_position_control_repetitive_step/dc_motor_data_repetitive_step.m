@@ -19,8 +19,8 @@ plot(t,u)
 plot(t,e)
 grid on;
 ylim([-100 100])
-xlim([0 20])
-title('Results for PR controller')
+xlim([0 40])
+title('Results for repetitive controller')
 xlabel('Time (s)')
 ylabel('Signals')
 legend('r(t) [º]','y(t) [º]','u(t) [%]','e(t) [º]');
@@ -28,4 +28,4 @@ legend('r(t) [º]','y(t) [º]','u(t) [%]','e(t) [º]');
 % save data
 set(gcf,'PaperUnits','centimeters');
 set(gcf,'PaperPosition',[0 0 25 15]);
-print(gcf, 'dc_motor_data_pr.png', '-dpng', '-r300');
+print(gcf, 'dc_motor_data_repetitive_step.png', '-dpng', '-r300');

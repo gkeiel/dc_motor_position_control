@@ -19,6 +19,7 @@ plot(t,u)
 plot(t,e)
 grid on;
 ylim([-100 100])
+xlim([0 20])
 title('Results for PID controller')
 xlabel('Time (s)')
 ylabel('Signals')

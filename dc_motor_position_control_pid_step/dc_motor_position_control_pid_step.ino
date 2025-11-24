@@ -1,17 +1,7 @@
 #include <TimerOne.h>
-# define MAX_BUF 250
 
-// signals variables
-float r, y, e, x_r1, y_r1, u, u_r, u_c, t, t_s;
-// parameters variables
-float k_p, k_r, b, a;
-// flags and counters variables
-int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff;
-
-// constants
-const int w = 1000, n = 20;
-const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
-float e_buffer[MAX_BUF];
+float r, y, e, e_a, u, u_p, u_c, u_i, u_ia, u_d, u_da, k_p, k_i, k_d, p, t, t_s;
+int flag_i, i = 0, t_ini = 5, r_high = 90, r_low = 0;
 
 
 void Timer1_ISR(void){
@@ -19,25 +9,19 @@ void Timer1_ISR(void){
 }
 
 void setup() {
-  // time values
-  t   = 0;
-  t_s = 0.002;
-
-  // controller gains
-  k_p = 20;
-  k_r = 70;
-
-  // controller filter coefficients
-  b     = w*t_s/(2.0 +w*t_s);
-  a     = (2.0 -w*t_s)/(2.0 +w*t_s);
-  N_eff = round((tau)/(t_s*n));
-  if (N_eff > MAX_BUF) N_eff = MAX_BUF;
-
-  // initialize values
-  x_r1 = 0.0;
-  y_r1 = 0.0;
-  for (int k = 0; k < N_eff; k++) e_buffer[k] = 0.0;
-
+  // PID gains ZN no overshoot
+  k_p = 46.3/5;
+  k_i = 13;
+  k_d = 0.05;
+  
+  // values
+  p    = 1;
+  e_a  = 0;
+  u_ia = 0;
+  u_da = 0;
+  t    = 0;
+  t_s  = 0.002;
+  
   // declares pins as output
   pinMode(3, OUTPUT);
   pinMode(5, OUTPUT);
@@ -46,15 +30,6 @@ void setup() {
   Serial.begin(115200);
   Timer1.initialize(t_s*1000000);     // interruption every t_s seconds
   Timer1.attachInterrupt(Timer1_ISR);
-}
-
-float LPF(float x_r){
-  float y_r = b*x_r +b*x_r1 +a*y_r1;
-
-  x_r1 = x_r;
-  y_r1 = y_r;
-
-  return y_r;
 }
 
 void measurement(){
@@ -71,8 +46,11 @@ void reference(){
     return;
   }
 
-  float phi = omega*(t -t_ini);
-  r         = sine_a*sin(phi);
+  float T = 10.0;
+  float D = 0.5;
+  float t_on = fmod(t -t_ini, T);
+  if (t_on <D*T) r = r_high;
+  else           r = r_low;
 }
 
 void control(){
@@ -81,32 +59,18 @@ void control(){
   reference();
 
   // error
-  e = r -y;
+  e   = r -y;
   if (abs(e)<dead) e = 0.0;
 
   // control signal
-  if (t <t_ini){
-    u_r = 0.0f;
-  }
-  else{
-    if (++n_counter >= n){
-      n_counter = 0;
+  u_p = k_p*e;
+  u_i = u_ia +k_i*t_s*(e +e_a)/2;
+  u_d = u_da*(2-p*t_s)/(2+p*t_s) +2*p*k_d/(2+p*t_s)*(e -e_a);
+  u   = u_p +u_i +u_d;
 
-      // repetitive output
-      float y_r = LPF(e_buffer[idx]);
-      u_r = k_r*(e +y_r);
-    
-      // update past values and index
-      e_buffer[idx] = e;
-      idx++;
-      if (idx >= N_eff) idx = 0;
-    }
-  }
-  u = k_p*e +u_r;
-  
   // limit control signal
   if (u < -umax) u = -umax;
-  if (u >  umax) u = umax;
+  if (u >  umax) u =  umax;
 
   // PWM from 0 to 255
   u_c = abs(u)*(255.0/umax);
@@ -118,13 +82,18 @@ void control(){
     analogWrite(5, 0);   // 0
     analogWrite(3, u_c); // PWM
   }
+
+  // update past values
+  e_a  = e;
+  u_ia = u_i;
+  u_da = u_d;
 }
 
 void communication(){
   if (t < t_ini){
     return;
   }
-
+  
   while (Serial.available() > 0){
     // set reference
     if (r < -360) r = -360;

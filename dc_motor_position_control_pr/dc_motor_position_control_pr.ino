@@ -18,22 +18,25 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 92.59;
-  k_r = 29090/10;
+  k_p = 92.6;
+  k_r = 200;//2909;
 
   // controller coefficients
-  xi    = 0.0001;
-  alpha = omega/tan(omega*t_s/2.0);
-  b_0 = 4.0*k_p*alpha*alpha +4.0*k_p*alpha*omega*xi +k_r*alpha*omega*xi +k_r*omega*omega;
-  b_1 = -8.0*k_p*alpha*alpha +2.0*k_r*omega*omega; 
-  b_2 = 4.0*k_p*alpha*alpha -4.0*k_p*alpha*omega*xi -k_r*alpha*omega*xi +k_r*omega*omega;
-  a_0 = alpha*alpha +2.0*alpha*omega*xi +omega*omega;
-  a_1 = -2.0*alpha*alpha +2.0*omega*omega;
-  a_2 = alpha*alpha -2.0*alpha*omega*xi +omega*omega;
+  xi  = 0.0;
+  b_0 = k_r*2*t_s;
+  b_1 = 0; 
+  b_2 = -k_r*2*t_s;
+  a_0 = 4.0 +4.0*xi*omega*t_s +omega*omega*t_s*t_s;
+  a_1 = -8.0 +2.0*omega*omega*t_s*t_s;
+  a_2 = 4.0 -4.0*xi*omega*t_s +omega*omega*t_s*t_s;
+
+  // controller coefficients pre-warping
+  //alpha = omega/tan(omega*t_s/2.0);
+  //...
 
   // controller coefficients normalized
   c_1 = b_0/a_0;
-  c_2 = b_1/a_0;
+  c_2 = b_1/a_0; // c_2 = 0
   c_3 = b_2/a_0;
   c_4 = a_1/a_0;
   c_5 = a_2/a_0;
@@ -78,7 +81,6 @@ void reference(){
 
 void control(){
   const int dead = 0, umax = 1000;
-  const float k_aw = 0.09;
   float u_unsat;
   reference();
 
@@ -108,17 +110,10 @@ void control(){
   }
 
   // update past values
-  float sat_err = u -u_unsat;
   e_2 = e_1;
   e_1 = e;
   u_2 = u_1;
-
-  if (abs(sat_err) > 0.0){
-    //u_1 = u_1 +k_aw*sat_err;
-  }
-  else{
-    u_1 = u_unsat;
-  }
+  u_1 = u_r;
 }
 
 void communication(){
