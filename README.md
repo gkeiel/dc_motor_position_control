@@ -20,17 +20,22 @@ The physical experiment is presented bellow
 
 ## Experimental results
 
-Let $r(t)$ be the reference of angular position, $y(t)$ the angular position, $u(t)$ the control signal, and $e(t)$ the tracking error. Assuming a problem of sinusoidal reference tracking with an 90 degrees amplitude, for a PID controller the following response is obtained:
+Let $r(t)$ be the reference of angular position, $y(t)$ the angular position, $u(t)$ the control signal, and $e(t)$ the tracking error. First, a relay experiment should be performed in order to obtain the critical $K_{u}$ gain and critical period $P_u$:
 <p align="center">
-<img width="733" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/aa734a0e-5273-4374-818e-98b97d847cf7" />
+<img width="733" height="395" alt="dc_motor_data_relay" src="https://github.com/user-attachments/assets/48136c1f-40c5-497f-83a5-fd6ec46e92f8" />
+</p>
+
+Assuming a problem of sinusoidal reference tracking with an 90 degrees amplitude, for a PID controller the following response is obtained:
+<p align="center">
+<img width="733" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/b2a49fdc-78cc-4410-9150-76d2e875ca93" />
 </p>
 
 For a PR controller the following response is obtained:
 <p align="center">
-<img width="733" 395="1772" alt="dc_motor_data_pr" src="https://github.com/user-attachments/assets/e0c402ff-79f7-49b7-af84-ad3468cd8b36" />
+<img width="733" 395="1772" alt="dc_motor_data_pr" src="https://github.com/user-attachments/assets/1f75fb73-9006-47a6-b80f-15246d4d2d92" />
 </p>
 
 For a repetitive controller the following response is obtained:
 <p align="center">
-<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/1e52b4d8-c95d-4932-bb62-966efbc2aeac" />
+<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/7d06a61d-ee27-4981-be56-7f738cf4a47e" />
 </p>
