@@ -32,10 +32,11 @@ Assuming a problem of sinusoidal reference tracking with an 90 degrees amplitude
 
 For a PR controller the following response is obtained:
 <p align="center">
-<img width="733" 395="1772" alt="dc_motor_data_pr" src="https://github.com/user-attachments/assets/1f75fb73-9006-47a6-b80f-15246d4d2d92" />
+<img width="733" 395="1772" alt="dc_motor_data_pr" src="https://github.com/user-attachments/assets/ee695dd0-672f-43c9-b457-f27c9b1216aa" />
 </p>
 
+<img width="2953" height="1772" 
 For a repetitive controller the following response is obtained:
 <p align="center">
-<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/7d06a61d-ee27-4981-be56-7f738cf4a47e" />
+<img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/a10ece36-b811-4a76-928f-3bf25d5db06c" />
 </p>
