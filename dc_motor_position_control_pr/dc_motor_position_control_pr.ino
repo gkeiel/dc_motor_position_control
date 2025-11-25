@@ -31,8 +31,9 @@ void setup() {
   a_2 = 4.0 -4.0*xi*omega*t_s +omega*omega*t_s*t_s;
 
   // controller coefficients pre-warping
-  //alpha = omega/tan(omega*t_s/2.0);
-  //...
+  // a_0u(k) = b_1e(k-1) +b_2e(k-2) -a_1e(k-1) -a_2e(k-2) 
+  alpha = omega/tan(omega*t_s/2.0);
+  
 
   // controller coefficients normalized
   c_1 = b_0/a_0;
