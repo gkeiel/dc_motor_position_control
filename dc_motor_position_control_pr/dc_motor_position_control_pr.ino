@@ -2,7 +2,7 @@
 
 float r, y, e, e_1, e_2, u, u_p, u_r, u_c, u_1, u_2, t, t_s;
 float k_p, k_r, c_1, c_2, c_3, c_4, c_5;
-int flag_i, i = 0, t_ini = 5;
+int flag_i, flag_pw = 1, i = 0, t_ini = 5;
 const float sine_a = 90, omega = 2.0*PI*0.1;
 
 
@@ -21,23 +21,33 @@ void setup() {
   k_p = 92.6;
   k_r = 200;//2909;
 
-  // controller coefficients
-  xi  = 0.0;
-  b_0 = k_r*2*t_s;
-  b_1 = 0; 
-  b_2 = -k_r*2*t_s;
-  a_0 = 4.0 +4.0*xi*omega*t_s +omega*omega*t_s*t_s;
-  a_1 = -8.0 +2.0*omega*omega*t_s*t_s;
-  a_2 = 4.0 -4.0*xi*omega*t_s +omega*omega*t_s*t_s;
-
-  // controller coefficients pre-warping
-  // a_0u(k) = b_1e(k-1) +b_2e(k-2) -a_1e(k-1) -a_2e(k-2) 
-  alpha = omega/tan(omega*t_s/2.0);
-  
+  if (flag_pw == 1){
+    // controller coefficients
+    // a_0*u_r(k) = b_0*e(k) +b_1*e(k-1) +b_2*e(k-2) -a_1*u_r(k-1) -a_2*u_r(k-2) 
+    xi  = 0.0;
+    b_0 = k_r*2*t_s;
+    b_1 = 0; 
+    b_2 = -k_r*2*t_s;
+    a_0 = 4.0 +4.0*xi*omega*t_s +omega*omega*t_s*t_s;
+    a_1 = -8.0 +2.0*omega*omega*t_s*t_s;
+    a_2 = 4.0 -4.0*xi*omega*t_s +omega*omega*t_s*t_s;
+  }
+  else{
+    // controller coefficients with pre-warping
+    // a_0*u_r(k) = b_0*e(k) +b_1*e(k-1) +b_2*e(k-2) -a_1*u_r(k-1) -a_2*u_r(k-2)
+    alpha = omega/tan(omega*t_s/2.0);
+    a_0 = alpha*alpha +2.0*xi*omega*alpha +omega*omega;
+    a_1 = -2.0*alpha*alpha +2.0*omega*omega;
+    a_2 = alpha*alpha -2*xi*omega*alpha +omega*omega;
+    b_0 = k_r*alpha;
+    b_1 = 0;
+    b_2 = -k_r*alpha;
+  }
 
   // controller coefficients normalized
+  // u_r(k) = c_1*e(k) +c_2*e(k-1) +c_3*e(k-2) -c_4*u_r(k-1) -c_5*u_r(k-2) 
   c_1 = b_0/a_0;
-  c_2 = b_1/a_0; // c_2 = 0
+  c_2 = b_1/a_0; // -> c_2 = 0
   c_3 = b_2/a_0;
   c_4 = a_1/a_0;
   c_5 = a_2/a_0;
@@ -82,7 +92,6 @@ void reference(){
 
 void control(){
   const int dead = 0, umax = 1000;
-  float u_unsat;
   reference();
 
   // error
@@ -90,14 +99,13 @@ void control(){
   if (abs(e)<dead) e = 0.0;
 
   // control signal
-  u_p = k_p*e;
+  u_p = k_p*e_2; // although if k_p*e, the difference is irrelevant
   u_r = c_1*e +c_2*e_1 +c_3*e_2 -c_4*u_1 -c_5*u_2;
-  u_unsat = u_p +u_r;
+  u   = u_p +u_r;
 
   // limit control signal
-  if (u_unsat < -umax) u = -umax;
-  else if (u_unsat > umax) u = umax;
-  else u = u_unsat;
+  if (u < -umax) u = -umax;
+  if (u > umax)  u = umax;
 
   // PWM from 0 to 255
   u_c = abs(u)*(255.0/umax);
