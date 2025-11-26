@@ -14,8 +14,7 @@ The following programs are available:
 
 The physical experiment is presented bellow
 <p align="center">
-<img width="500" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/d628d326-d182-4be2-b000-68d90202edd6" />
-<img width="500" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/e1b99fd0-33b4-4536-8ad6-5086f1dbdcb5" />
+<img width="500" height="395" alt="dc_motor_data_pid" src="https://github.com/user-attachments/assets/252c9af2-f54f-4d89-bdc0-c545092065df" />
 </p>
 
 ## Experimental results
