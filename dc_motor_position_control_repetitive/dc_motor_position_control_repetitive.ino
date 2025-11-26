@@ -24,7 +24,7 @@ void setup() {
   t_s = 0.002;
 
   // controller gains
-  k_p = 20;
+  k_p = 40;
   k_r = 70;
   k_c = (1.0/w_c)*sqrt(omega*omega +w_c*w_c); // correction for infinite gain  
 
