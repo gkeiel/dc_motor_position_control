@@ -4,13 +4,13 @@
 // signals variables
 float r, y, e, x_r1, y_r1, u, u_r, u_c, t, t_s;
 // parameters variables
-float k_p, k_r, b, a;
+float k_p, k_r, k_c, b, a;
 // flags and counters variables
 int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff;
 
 // constants
-const int w = 1000, n = 20;
-const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
+const int w_c = 1000, n = 20;
+const float sine_a = 90, omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w_c) -2*PI);
 float e_buffer[MAX_BUF];
 
 
@@ -26,10 +26,11 @@ void setup() {
   // controller gains
   k_p = 20;
   k_r = 70;
+  k_c = (1.0/w_c)*sqrt(omega*omega +w_c*w_c); // correction for infinite gain  
 
   // controller filter coefficients
-  b     = w*t_s/(2.0 +w*t_s);
-  a     = (2.0 -w*t_s)/(2.0 +w*t_s);
+  b     = k_c*w_c*t_s/(2.0 +w_c*t_s);
+  a     = (-2.0 +w_c*t_s)/(2.0 +w_c*t_s);
   N_eff = round((tau)/(t_s*n));
   if (N_eff > MAX_BUF) N_eff = MAX_BUF;
 
@@ -49,7 +50,7 @@ void setup() {
 }
 
 float LPF(float x_r){
-  float y_r = b*x_r +b*x_r1 +a*y_r1;
+  float y_r = b*x_r +b*x_r1 -a*y_r1;
 
   x_r1 = x_r;
   y_r1 = y_r;
