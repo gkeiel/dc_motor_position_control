@@ -38,3 +38,13 @@ For a repetitive controller the following response is obtained:
 <p align="center">
 <img width="733" 395="1772" alt="dc_motor_data_repetitive" src="https://github.com/user-attachments/assets/a10ece36-b811-4a76-928f-3bf25d5db06c" />
 </p>
+
+Assuming a problem of triangular reference tracking with a 90 degrees amplitude and frequency of 0.1 Hz, for a PR controller the following response is obtained:
+<p align="center">
+<img width="733" 395="1772" alt="dc_motor_data_pmr_triangular_h1" src="https://github.com/user-attachments/assets/edde3e97-e720-48d3-98be-2335a7a10dc5" />
+</p>
+
+For a PMR controller with $h = 6$ resonant modes the following response is obtained:
+<p align="center">
+<img width="733" 395="1772" alt="dc_motor_data_pmr_triangular_h6" src="https://github.com/user-attachments/assets/794d75c1-2af4-4dfb-80a3-4f9272ded1fa" />
+</p>
