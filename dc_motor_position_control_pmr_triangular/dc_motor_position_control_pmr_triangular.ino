@@ -57,7 +57,7 @@ void setup() {
   //
   for(int i = 0; i < m; i++){
     float w_h = h[i]*w_0;
-    res_coeff(mode[i], w_h, xi, k_r/h[i], t_s);
+    res_coeff(mode[i], w_h, xi, k_r/2, t_s);
   }
  
   // declares pins as output
