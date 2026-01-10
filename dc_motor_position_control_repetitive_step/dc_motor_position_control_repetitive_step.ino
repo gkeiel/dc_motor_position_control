@@ -1,158 +1,76 @@
-#include <TimerOne.h>
-# define MAX_BUF 250
+#include <Arduino.h>
 
-// signals variables
-float r, y, e, x_r1, y_r1, u, u_r, u_c, t, t_s;
-// parameters variables
-float k_p, k_r, b, a;
-// flags and counters variables
-int flag_i = 0, i = 0, idx = 0, t_ini = 5, n_counter = 0, N_eff, r_high = 90, r_low = 0;
+// ----- CONFIGURAÇÃO -----
+#define PIN_TIP   D7   // pino que ativa o TIP122
+#define PIN_ADC   A0   // leitura do LC paralelo
 
-// constants
-const int w = 1000, n = 20;
-const float omega = 2.0*PI*0.1, tau = -(1.0/omega)*(atan(omega/w) -2*PI);
-float e_buffer[MAX_BUF];
+const int N = 256;     // número de amostras
+uint16_t bufferADC[N]; // buffer de leitura do LC
 
+// protótipo da sua função
+float compute_f0(uint16_t *buf, int len);
 
-void Timer1_ISR(void){
-  flag_i = 1;
-}
-
+// ----------------------------------------------------
 void setup() {
-  // time values
-  t   = 0;
-  t_s = 0.002;
-
-  // controller gains
-  k_p = 18;
-  k_r = 15;
-
-  // controller filter coefficients
-  b     = w*t_s/(2.0 +w*t_s);
-  a     = (2.0 -w*t_s)/(2.0 +w*t_s);
-  N_eff = floor((tau)/(t_s*n));
-  if (N_eff > MAX_BUF) N_eff = MAX_BUF;
-
-  // initialize values
-  x_r1 = 0.0;
-  y_r1 = 0.0;
-  for (int k = 0; k < N_eff; k++) e_buffer[k] = 0.0;
-
-  // declares pins as output
-  pinMode(3, OUTPUT);
-  pinMode(5, OUTPUT);
-
-  // initializes serial communication
   Serial.begin(115200);
-  Timer1.initialize(t_s*1000000);     // interruption every t_s seconds
-  Timer1.attachInterrupt(Timer1_ISR);
+  pinMode(PIN_TIP, OUTPUT);
+  digitalWrite(PIN_TIP, LOW);
+  pinMode(PIN_ADC, INPUT);
+
+  Serial.println("Sistema iniciado.");
 }
 
-float LPF(float x_r){
-  float y_r = b*x_r +b*x_r1 +a*y_r1;
+// ----------------------------------------------------
+void exciteLC() {
+  // Pulso curto de excitação (65 a 150us funciona na maioria dos L)
+  digitalWrite(PIN_TIP, HIGH);
+  delayMicroseconds(80);
+  digitalWrite(PIN_TIP, LOW);
 
-  x_r1 = x_r;
-  y_r1 = y_r;
-
-  return y_r;
+  // LC agora começa a oscilar livremente
 }
 
-void measurement(){
-  // read sensor
-  float fact = 450.0/128;
-  y = (analogRead(A0) -511)*fact;
-}
-
-void reference(){
-  t += t_s;
-
-  if (t < t_ini){
-    r = 0.0;
-    return;
-  }
-
-  float T = 10.0;
-  float D = 0.5;
-  float t_on = fmod(t -t_ini, T);
-  if (t_on <D*T) r = r_high;
-  else           r = r_low;
-}
-
-void control(){
-  const int dead = 0;
-  const int umax = 1000;
-  reference();
-
-  // error
-  e = r -y;
-  if (abs(e)<dead) e = 0.0;
-
-  // control signal
-  if (t <t_ini){
-    u_r = 0.0f;
-  }
-  else{
-    if (++n_counter >= n){
-      n_counter = 0;
-
-      // repetitive output
-      float y_r = LPF(e_buffer[idx]);
-      u_r = k_r*(e +y_r);
-    
-      // update past values and index
-      e_buffer[idx] = e;
-      idx++;
-      if (idx >= N_eff) idx = 0;
-    }
-  }
-  u = k_p*e +u_r;
-  
-  // limit control signal
-  if (u < -umax) u = -umax;
-  if (u >  umax) u = umax;
-
-  // PWM from 0 to 255
-  u_c = abs(u)*(255.0/umax);
-  if (u >= 0){
-    analogWrite(5, u_c); // PWM
-    analogWrite(3, 0);   // 0
-  }
-  else{
-    analogWrite(5, 0);   // 0
-    analogWrite(3, u_c); // PWM
+// ----------------------------------------------------
+void sampleLC() {
+  // amostragem imediatamente após excitação
+  for (int i = 0; i < N; i++) {
+    bufferADC[i] = analogRead(PIN_ADC);
+    delayMicroseconds(25);  
+    // ajusta se quiser amostrar mais rápido ou mais devagar
   }
 }
 
-void communication(){
-  if (t < t_ini){
-    return;
-  }
+// ----------------------------------------------------
+void loop() {
 
-  while (Serial.available() > 0){
-    // set reference
-    if (r < -360) r = -360;
-    if (r > 360)  r = 360;
-  }
+  // 1. excita o LC
+  exciteLC();
 
-  // print signals
-  if ( i == 1 ){
-    Serial.print(r, 2);
-    Serial.print(" ");
-    Serial.print(y, 2);
-    Serial.print(" ");
-    Serial.print(e, 2);
-    Serial.print(" ");
-    Serial.println(u, 2);
-    i = 0;
-  }
-  i++;
+  // 2. coleta amostras sincronizadas
+  sampleLC();
+
+  // 3. calcula frequência de ressonância
+  float f0 = compute_f0(bufferADC, N);
+
+  // 4. mostra resultado
+  Serial.print("f0 = ");
+  Serial.print(f0);
+  Serial.println(" Hz");
+
+  delay(300);  // só pra não lotar o serial monitor
 }
 
-void loop(){
-  if (flag_i == 1){
-    measurement();
-    control();
-    communication();
-    flag_i = 0;
-  }
+// ----------------------------------------------------
+// VERSÃO BÁSICA DA SUA compute_f0 (caso queira testar)
+// substitua pela sua FFT/método real
+float compute_f0(uint16_t *buf, int len) {
+  // Aqui você coloca sua FFT ou zero–cross
+  // Para teste, só retorno algo baseado no buffer
+  long soma = 0;
+  for (int i = 0; i < len; i++) soma += buf[i];
+
+  float media = soma / (float)len;
+
+  // Apenas exemplo para provar funcionamento
+  return media * 10;  
 }

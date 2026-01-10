@@ -135,6 +135,18 @@ void control(){
   if (u > umax)  u = umax;
 }
 
+void pwm(){
+  uint8_t u_pwm = abs(u)*(255.0/umax);
+  if (u >= 0){
+    analogWrite(5, u_pwm);
+    analogWrite(3, 0);
+  }
+  else{
+    analogWrite(5, 0);
+    analogWrite(3, u_pwm);
+  }
+}
+
 void communication(){
   while (Serial.available() > 0){
     // read serial input
@@ -168,18 +180,6 @@ void communication(){
     k = 0;
   }
   k++;
-}
-
-void pwm(){
-  uint8_t u_pwm = abs(u)*(255.0/umax);
-  if (u >= 0){
-    analogWrite(5, u_pwm);
-    analogWrite(3, 0);
-  }
-  else{
-    analogWrite(5, 0);
-    analogWrite(3, u_pwm);
-  }
 }
 
 void loop(){
